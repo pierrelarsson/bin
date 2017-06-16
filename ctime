@@ -1,0 +1,64 @@
+#!/usr/bin/env python
+
+import sys
+import time
+
+output_format = "%Y-%m-%d %H:%M:%S (%s) [%a]"
+
+time_formats = [
+    '%H:%M:%S',
+    '%H%M%S',
+]
+
+date_formats = [
+    '%y%m%d',
+    '%Y%m%d',
+    '%m%d%y',
+    '%m%d%Y',
+    '%Y-%m-%d',
+    '%y-%m-%d',
+    '%Y.%m.%d',
+    '%y.%m.%d',
+    '%Y %m %d',
+    '%y %m %d',
+    '%m/%d/%Y',
+    '%m/%d/%y',
+]
+
+formats = [
+    '%a %b %d %H:%M:%S %Y',
+]
+
+# current or time argument
+try:
+    timestamp = sys.argv[1]
+except IndexError:
+    timestamp = time.time()
+
+# generate formats
+formats.extend(time_formats)
+formats.extend(date_formats)
+for d in date_formats:
+    for t in time_formats:
+        formats.append('{0} {1}'.format(d, t))
+
+if __name__ == "__main__":
+    # unix timestamp?
+    try:
+        print time.strftime(output_format, time.localtime(float(timestamp)))
+        print time.strftime(output_format, time.localtime(float(timestamp)/1000))
+    except ValueError:
+        pass
+
+    for f in formats:
+        try:
+            st = time.strptime(timestamp, f)
+            if st.tm_year == 1900:
+                ct = time.localtime()
+                st = time.struct_time([ct.tm_year, ct.tm_mon, ct.tm_mday,
+                    st.tm_hour, st.tm_min, st.tm_sec, ct.tm_wday,
+                    ct.tm_yday, ct.tm_isdst])
+            print time.strftime(output_format, st)
+        except (ValueError, TypeError):
+            pass
+
