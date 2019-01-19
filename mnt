@@ -1,0 +1,37 @@
+#!/bin/bash
+
+set -e
+
+[ `stat --format %m /mnt` = "/" ]
+
+PS3="> "
+COLUMNS=1
+DEVICES=()
+MENU=()
+
+function getdevices {
+    find . -maxdepth 1 -type f \
+        -iname "*$1*" \
+        -a \( -name "$1" \
+            -o -iname "*.iso" \
+            -o -iname "*.img" \
+            -o -iname "*.part" \
+            -o -iname "*.partition" \
+        \)
+    find /dev/disk/by-id -iname "*$1*" -lname "*[0-9]" -type l
+}
+
+while read device ; do
+    DEVICES+=("$device")
+    MENU+=("`basename "$device"`")
+done < <( ( getdevices | sort ) )
+
+select name in "${MENU[@]}" ; do
+    [ -n "$name" ]
+    device=${DEVICES[$REPLY-1]}
+    sudo mkdir --parents "/mnt/$name"
+    sudo mount --verbose "$device" "/mnt/$name" || sudo rmdir "/mnt/$name"
+    exit $?
+done
+
+exit 1

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+[ `stat --format %m /mnt` = "/" ]
+
+while read directory ; do
+    if [ "$directory" = "`stat --format %m $directory`" ] ; then
+        sudo umount "$directory"
+        sudo rmdir --verbose "$directory"
+    fi
+done < <(find /mnt -mindepth 1 -maxdepth 1 -type d)
