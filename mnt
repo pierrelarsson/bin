@@ -24,7 +24,7 @@ function getdevices {
 while read device ; do
     DEVICES+=("$device")
     MENU+=("`basename "$device"`")
-done < <( ( getdevices | sort ) )
+done < <( ( getdevices $1 | sort ) )
 
 select name in "${MENU[@]}" ; do
     [ -n "$name" ]
